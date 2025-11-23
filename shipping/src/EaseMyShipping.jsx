@@ -29,24 +29,23 @@ export default function EaseMyShipping() {
   const [sectionStyles, setSectionStyles] = useState({});
 
   const heroImages = [
-  withBase("images/hero-ship.jpg"),
-  withBase("images/port.jpg"),
-  withBase("images/truck.jpg"),
-  withBase("images/cta-bg.jpg"),
-];
+    withBase("images/hero-ship.jpg"),
+    withBase("images/port.jpg"),
+    withBase("images/truck.jpg"),
+    withBase("images/cta-bg.jpg"),
+  ];
 
   const [heroIndex, setHeroIndex] = useState(0);
 
   const brandLogos = [
-  { src: withBase("logos/biba.png"), alt: "BIBA", size: "h-14" },
-  { src: withBase("logos/apml.png"), alt: "APML", size: "h-16" },
-  { src: withBase("logos/stag.png"), alt: "STAG Global", size: "h-12" },
-  { src: withBase("logos/cls.png"), alt: "CLS", size: "h-14" },
-  { src: withBase("logos/semco.png"), alt: "SEMCO", size: "h-10" },
-  { src: withBase("logos/kailash.png"), alt: "Kailash", size: "h-16" },
-  { src: withBase("logos/tt.png"), alt: "T.T.", size: "h-14" },
-];
-
+    { src: withBase("logos/biba.png"), alt: "BIBA", size: "h-14" },
+    { src: withBase("logos/apml.png"), alt: "APML", size: "h-16" },
+    { src: withBase("logos/stag.png"), alt: "STAG Global", size: "h-12" },
+    { src: withBase("logos/cls.png"), alt: "CLS", size: "h-14" },
+    { src: withBase("logos/semco.png"), alt: "SEMCO", size: "h-10" },
+    { src: withBase("logos/kailash.png"), alt: "Kailash", size: "h-16" },
+    { src: withBase("logos/tt.png"), alt: "T.T.", size: "h-14" },
+  ];
 
   const services = [
     {
@@ -203,48 +202,67 @@ export default function EaseMyShipping() {
   ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      const totalHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const progress = totalHeight > 0 ? currentY / totalHeight : 0;
+  let ticking = false;
 
-      setScrollY(currentY);
-      setScrollProgress(progress);
+  const updateScroll = () => {
+    const currentY = window.scrollY;
+    const totalHeight =
+      document.documentElement.scrollHeight - window.innerHeight;
+    const progress = totalHeight > 0 ? currentY / totalHeight : 0;
 
-      const slides = document.querySelectorAll(".slide-section");
-      const vh = window.innerHeight || 1;
-      const newStyles = {};
+    setScrollY(currentY);
+    setScrollProgress(progress);
 
-      slides.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const center = rect.top + rect.height / 2;
-        const centerOffset = (center - vh / 2) / vh;
+    // 🟦 On mobile, skip the heavy 3D card transforms to keep it smooth
+    if (window.innerWidth < 768) {
+      ticking = false;
+      return;
+    }
 
-        const scale = 1 - Math.min(Math.abs(centerOffset) * 0.06, 0.1);
-        const translateY = centerOffset * -40;
-        const rotateX = centerOffset * 6;
+    const slides = document.querySelectorAll(".slide-section");
+    const vh = window.innerHeight || 1;
+    const newStyles = {};
 
-        const distanceFromCenter = Math.abs(centerOffset);
-        const zIndex =
-          distanceFromCenter < 0.3 ? 100 : 50 - Math.floor(distanceFromCenter * 10);
+    slides.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const centerOffset = (center - vh / 2) / vh;
 
-        if (el.id) {
-          newStyles[el.id] = {
-            transform: `translateY(${translateY}px) scale(${scale}) rotateX(${rotateX}deg)`,
-            opacity: 1,
-            zIndex: zIndex,
-          };
-        }
-      });
+      const scale = 1 - Math.min(Math.abs(centerOffset) * 0.06, 0.1);
+      const translateY = centerOffset * -40;
+      const rotateX = centerOffset * 6;
 
-      setSectionStyles(newStyles);
-    };
+      const distanceFromCenter = Math.abs(centerOffset);
+      const zIndex =
+        distanceFromCenter < 0.3 ? 100 : 50 - Math.floor(distanceFromCenter * 10);
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+      if (el.id) {
+        newStyles[el.id] = {
+          transform: `translateY(${translateY}px) scale(${scale}) rotateX(${rotateX}deg)`,
+          opacity: 1,
+          zIndex: zIndex,
+        };
+      }
+    });
+
+    setSectionStyles(newStyles);
+    ticking = false;
+  };
+
+  const handleScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateScroll);
+      ticking = true;
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  updateScroll(); // run once on mount
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -322,12 +340,12 @@ export default function EaseMyShipping() {
 
       {/* NAVBAR */}
       <nav className="fixed w-full z-50 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 text-lg font-bold">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/50">
               <Package className="w-5 h-5 text-white" />
             </span>
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent text-base sm:text-lg">
               EaseMyShipping
             </span>
           </div>
@@ -379,7 +397,7 @@ export default function EaseMyShipping() {
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-slate-950/95 backdrop-blur-xl pt-24 px-6 md:hidden">
+        <div className="fixed inset-0 z-40 bg-slate-950/95 backdrop-blur-xl pt-20 sm:pt-24 px-6 md:hidden">
           <div className="flex flex-col gap-6 text-xl font-semibold">
             {["about", "services", "why", "faq", "contact"].map((section) => (
               <button
@@ -404,7 +422,7 @@ export default function EaseMyShipping() {
 
       {/* HERO WITH SLIDESHOW */}
       <section
-        className="relative min-h-screen flex items-center justify-center px-6 pt-32 pb-24 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 pt-28 sm:pt-32 pb-20 sm:pb-24 overflow-hidden"
         onMouseMove={handleMouseMove}
       >
         {/* background slideshow */}
@@ -422,27 +440,27 @@ export default function EaseMyShipping() {
           ))}
         </div>
 
-        <div className="absolute -left-40 top-10 w-[420px] h-[420px] bg-blue-500/14 blur-[130px] rounded-full animate-pulse" />
+        <div className="absolute -left-40 top-10 w-[320px] sm:w-[420px] h-[320px] sm:h-[420px] bg-blue-500/14 blur-[130px] rounded-full animate-pulse" />
 
         <div
-          className="relative max-w-6xl mx-auto text-center space-y-8"
+          className="relative max-w-6xl mx-auto text-center space-y-6 sm:space-y-8"
           style={heroParallax}
         >
           <div
-            className="inline-block mb-4 opacity-0 animate-fadeInUp"
+            className="inline-block mb-3 sm:mb-4 opacity-0 animate-fadeInUp"
             style={{
               animationDelay: "0.15s",
               animationFillMode: "forwards",
             }}
           >
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-slate-700 rounded-full text-xs text-blue-200 font-medium shadow-lg">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/60 border border-slate-700 rounded-full text-[11px] sm:text-xs text-blue-200 font-medium shadow-lg">
               <Star className="w-4 h-4 text-blue-300" />
               <span>Trusted by brands that can't afford delays</span>
             </div>
           </div>
 
           <h1
-            className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4 opacity-0 animate-fadeInUp"
+            className="hero-title text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-3 sm:mb-4 opacity-0 animate-fadeInUp"
             style={{
               animationDelay: "0.3s",
               animationFillMode: "forwards",
@@ -456,7 +474,7 @@ export default function EaseMyShipping() {
           </h1>
 
           <p
-            className="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto mb-8 opacity-0 animate-fadeInUp"
+            className="hero-subtitle text-base sm:text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto mb-6 sm:mb-8 opacity-0 animate-fadeInUp"
             style={{
               animationDelay: "0.45s",
               animationFillMode: "forwards",
@@ -467,24 +485,24 @@ export default function EaseMyShipping() {
           </p>
 
           <div
-            className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fadeInUp"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center opacity-0 animate-fadeInUp"
             style={{
               animationDelay: "0.6s",
               animationFillMode: "forwards",
             }}
           >
-            <button className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm rounded-full hover:shadow-xl hover:shadow-blue-500/50 transition-all flex items-center justify-center gap-2 hover:scale-105">
+            <button className="group px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm rounded-full hover:shadow-xl hover:shadow-blue-500/50 transition-all flex items-center justify-center gap-2 hover:scale-105">
               Get Started
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="px-8 py-4 border border-slate-300/70 text-sm rounded-full hover:bg-slate-900/60 transition-all">
+            <button className="px-7 sm:px-8 py-3.5 sm:py-4 border border-slate-300/70 text-sm rounded-full hover:bg-slate-900/60 transition-all">
               Learn More
             </button>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-slate-400/50 rounded-full flex justify-center p-2">
             <div className="w-1 h-3 bg-gradient-to-b from-blue-400 to-cyan-400 rounded-full animate-scroll-indicator" />
           </div>
@@ -492,22 +510,22 @@ export default function EaseMyShipping() {
       </section>
 
       {/* TRUSTED BY */}
-      <section className="py-20 px-6 border-t border-slate-800 bg-slate-950/95">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 border-t border-slate-800 bg-slate-950/95">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-sm md:text-base tracking-[0.25em] text-slate-300 mb-10 uppercase">
+          <p className="text-center text-xs sm:text-sm md:text-base tracking-[0.25em] text-slate-300 mb-8 sm:mb-10 uppercase">
             TRUSTED BY
           </p>
 
           <div className="relative overflow-hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-slate-950 to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-slate-950 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-10 sm:w-20 bg-gradient-to-r from-slate-950 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 sm:w-20 bg-gradient-to-l from-slate-950 to-transparent z-10" />
 
             <div className="marquee-outer">
               <div className="marquee-track">
                 {[...brandLogos, ...brandLogos].map((brand, i) => (
                   <div
                     key={i}
-                    className="mx-12 flex items-center justify-center"
+                    className="mx-6 sm:mx-12 flex items-center justify-center"
                   >
                     <img
                       src={brand.src}
@@ -530,33 +548,33 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-950"
           style={{ zIndex: 2, ...(sectionStyles["about"] || {}) }}
         >
-          <div className="inner-slide py-20 px-6 md:px-10">
-            <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+          <div className="inner-slide py-16 sm:py-20 px-4 sm:px-6 md:px-10">
+            <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-center">
               <div
                 data-animate
                 id="about-content"
                 className={
                   (isVisible["about-content"]
                     ? "animate-fadeInUp "
-                    : "opacity-0 ") + "space-y-7 md:space-y-8"
+                    : "opacity-0 ") + "space-y-5 md:space-y-8"
                 }
               >
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                   About Us
                 </h2>
 
-                <p className="text-xl md:text-2xl text-slate-200 leading-relaxed max-w-xl">
+                <p className="text-lg sm:text-xl md:text-2xl text-slate-200 leading-relaxed max-w-xl">
                   We exist to take logistics off your plate—so your team can stop
                   firefighting shipments and focus on building the business.
                 </p>
 
-                <p className="text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl">
+                <p className="text-sm sm:text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl">
                   From first-mile pickup to international freight, we design and run
                   shipping flows that feel predictable, transparent and calm—even
                   when your volumes grow and routes get complex.
                 </p>
 
-                <div className="grid md:grid-cols-2 gap-5 pt-4 md:pt-6">
+                <div className="grid md:grid-cols-2 gap-5 pt-3 sm:pt-4 md:pt-6">
                   <div
                     data-animate
                     id="mission"
@@ -564,16 +582,16 @@ export default function EaseMyShipping() {
                       (isVisible["mission"]
                         ? "animate-fadeInUp "
                         : "opacity-0 ") +
-                      "p-6 md:p-7 border border-slate-800 rounded-2xl bg-slate-900/70 hover:border-blue-500/80 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/25 transition-all"
+                      "p-5 sm:p-6 md:p-7 border border-slate-800 rounded-2xl bg-slate-900/70 hover:border-blue-500/80 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/25 transition-all"
                     }
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/50">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-blue-500/50">
                       <Target className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold mb-2">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">
                       Our Mission
                     </h3>
-                    <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
+                    <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
                       To become your silent logistics engine—reliable enough that your
                       customers never have to think about where their order is.
                     </p>
@@ -586,17 +604,17 @@ export default function EaseMyShipping() {
                       (isVisible["vision"]
                         ? "animate-fadeInUp "
                         : "opacity-0 ") +
-                      "p-6 md:p-7 border border-slate-800 rounded-2xl bg-slate-900/50 hover:border-cyan-500/80 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-cyan-500/20 transition-all"
+                      "p-5 sm:p-6 md:p-7 border border-slate-800 rounded-2xl bg-slate-900/50 hover:border-cyan-500/80 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-cyan-500/20 transition-all"
                     }
                     style={{ animationDelay: "0.1s" }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/50">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mb-3 sm:mb-4 shadow-lg shadow-cyan-500/50">
                       <Globe className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold mb-2">
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">
                       Our Vision
                     </h3>
-                    <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
+                    <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
                       A world where scaling a brand never means losing visibility,
                       control or sleep over your shipping and warehousing.
                     </p>
@@ -614,28 +632,27 @@ export default function EaseMyShipping() {
                   "relative flex items-center justify-center"
                 }
               >
-                <div className="absolute -right-10 -top-10 w-64 h-64 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl rounded-full pointer-events-none animate-pulse" />
+                <div className="absolute -right-6 sm:-right-10 -top-10 w-48 sm:w-64 h-48 sm:h-64 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl rounded-full pointer-events-none animate-pulse" />
                 <div
-                  className="relative h-80 md:h-96 lg:h-[26rem] w-full rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900/60 group hover:scale-105 transition-transform duration-500"
+                  className="relative h-64 sm:h-80 md:h-96 lg:h-[26rem] w-full rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900/60 group hover:scale-105 transition-transform duration-500"
                   style={{
-  backgroundImage: `linear-gradient(to top, rgba(15,23,42,0.9), rgba(15,23,42,0.05)), url('${withBase(
-    "images/port.jpg"
-  )}')`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}}
-
+                    backgroundImage: `linear-gradient(to top, rgba(15,23,42,0.9), rgba(15,23,42,0.05)), url('${withBase(
+                      "images/port.jpg"
+                    )}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
                 >
-                  <div className="absolute inset-x-6 bottom-6 rounded-2xl bg-slate-950/80 border border-slate-700/60 px-4 py-3 md:px-5 md:py-4 backdrop-blur-md group-hover:scale-105 transition-transform">
+                  <div className="absolute inset-x-4 sm:inset-x-6 bottom-4 sm:bottom-6 rounded-2xl bg-slate-950/80 border border-slate-700/60 px-3 sm:px-4 md:px-5 py-3 md:py-4 backdrop-blur-md group-hover:scale-105 transition-transform">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <Sparkles className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-blue-200 text-[11px] md:text-xs tracking-wide mb-1 uppercase">
+                        <p className="font-semibold text-blue-200 text-[10px] sm:text-[11px] md:text-xs tracking-wide mb-1 uppercase">
                           Orchestrated logistics
                         </p>
-                        <p className="text-[11px] md:text-xs leading-relaxed text-slate-200">
+                        <p className="text-[10px] sm:text-[11px] md:text-xs leading-relaxed text-slate-200">
                           Multi-modal freight, real-time tracking and coordinated
                           handoffs—bundled into one calm, predictable experience for
                           your ops team.
@@ -655,23 +672,23 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-900"
           style={{ zIndex: 3, ...(sectionStyles["services"] || {}) }}
         >
-          <div className="inner-slide py-16 px-6 md:px-10">
+          <div className="inner-slide py-14 sm:py-16 px-4 sm:px-6 md:px-10">
             <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                <div className="inline-block mb-4">
-                  <span className="px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-medium uppercase tracking-wider">
+              <div className="text-center mb-12 sm:mb-16">
+                <div className="inline-block mb-3 sm:mb-4">
+                  <span className="px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider">
                     Our Solutions
                   </span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
                   Our Services
                 </h2>
-                <p className="text-lg text-slate-300">
+                <p className="text-base sm:text-lg text-slate-300">
                   Complete logistics solutions for every need
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                 {services.map((service, i) => {
                   const Icon = service.icon;
                   return (
@@ -686,7 +703,7 @@ export default function EaseMyShipping() {
                       }
                       style={{ animationDelay: `${i * 0.1}s` }}
                     >
-                      <div className="group relative p-10 bg-slate-950/90 border border-slate-800 rounded-3xl hover:border-transparent transition-all hover:-translate-y-3 hover:shadow-2xl backdrop-blur-sm overflow-hidden h-full">
+                      <div className="group relative p-7 sm:p-8 md:p-10 bg-slate-950/90 border border-slate-800 rounded-3xl hover:border-transparent transition-all hover:-translate-y-3 hover:shadow-2xl backdrop-blur-sm overflow-hidden h-full">
                         <div
                           className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
                           style={{
@@ -700,18 +717,18 @@ export default function EaseMyShipping() {
 
                         <div className="relative z-10">
                           <div
-                            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg`}
+                            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-5 sm:mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg`}
                           >
-                            <Icon className="w-8 h-8 text-white" />
+                            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                           </div>
-                          <h3 className="text-2xl font-bold mb-4 group-hover:text-blue-300 transition-colors">
+                          <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 group-hover:text-blue-300 transition-colors">
                             {service.title}
                           </h3>
-                          <p className="text-slate-300 leading-relaxed">
+                          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                             {service.desc}
                           </p>
-                          <div className="mt-6 flex items-center text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-sm font-medium">
+                          <div className="mt-5 sm:mt-6 flex items-center text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-xs sm:text-sm font-medium">
                               Learn more
                             </span>
                             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -732,23 +749,23 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-950"
           style={{ zIndex: 4, ...(sectionStyles["why"] || {}) }}
         >
-          <div className="inner-slide py-16 px-6 md:px-10">
+          <div className="inner-slide py-14 sm:py-16 px-4 sm:px-6 md:px-10">
             <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                <div className="inline-block mb-4">
-                  <span className="px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-medium uppercase tracking-wider">
+              <div className="text-center mb-12 sm:mb-16">
+                <div className="inline-block mb-3 sm:mb-4">
+                  <span className="px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider">
                     Why Choose Us
                   </span>
                 </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 bg-clip-text text-transparent">
                   Why Choose Us
                 </h2>
-                <p className="text-lg text-slate-300">
+                <p className="text-base sm:text-lg text-slate-300">
                   8 reasons we are the best in the business
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                 {whyUs.map((item, i) => {
                   const Icon = item.icon;
                   return (
@@ -763,23 +780,23 @@ export default function EaseMyShipping() {
                       }
                       style={{ animationDelay: `${i * 0.05}s` }}
                     >
-                      <div className="group relative h-full p-7 border border-slate-800/50 rounded-2xl bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-sm transition-all hover:-translate-y-2 hover:shadow-xl overflow-hidden">
+                      <div className="group relative h-full p-6 sm:p-7 border border-slate-800/50 rounded-2xl bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-sm transition-all hover:-translate-y-2 hover:shadow-xl overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute top-0 right-0 w-28 sm:w-32 h-28 sm:h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="relative z-10">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="text-6xl font-bold bg-gradient-to-br from-blue-400 to-cyan-400 bg-clip-text text-transparent opacity-20 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-between mb-3 sm:mb-4">
+                            <div className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-br from-blue-400 to-cyan-400 bg-clip-text text-transparent opacity-20 group-hover:opacity-100 transition-opacity">
                               {item.num}
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                               <Icon className="w-5 h-5 text-blue-300" />
                             </div>
                           </div>
-                          <h3 className="text-xl font-bold mb-3 group-hover:text-blue-300 transition-colors">
+                          <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 group-hover:text-blue-300 transition-colors">
                             {item.title}
                           </h3>
-                          <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-300 transition-colors">
+                          <p className="text-slate-400 text-xs sm:text-sm leading-relaxed group-hover:text-slate-300 transition-colors">
                             {item.desc}
                           </p>
                         </div>
@@ -798,23 +815,23 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-900"
           style={{ zIndex: 5, ...(sectionStyles["faq"] || {}) }}
         >
-          <div className="inner-slide py-16 px-6 md:px-10">
+          <div className="inner-slide py-14 sm:py-16 px-4 sm:px-6 md:px-10">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-16">
-                <div className="inline-block mb-4">
-                  <span className="px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium uppercase tracking-wider">
+              <div className="text-center mb-12 sm:mb-16">
+                <div className="inline-block mb-3 sm:mb-4">
+                  <span className="px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider">
                     Questions &amp; Answers
                   </span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-cyan-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
                   FAQ
                 </h2>
-                <p className="text-lg text-slate-300">
+                <p className="text-base sm:text-lg text-slate-300">
                   Got questions? We have answers
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {faqs.map((faq, i) => (
                   <div
                     key={i}
@@ -829,12 +846,12 @@ export default function EaseMyShipping() {
                   >
                     <div className="group bg-slate-950/70 border border-slate-800/50 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all backdrop-blur-sm hover:shadow-xl hover:shadow-blue-500/10">
                       <button
-                        className="w-full p-6 text-left flex items-center justify-between gap-4"
+                        className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4"
                         onClick={() =>
                           setActiveFAQ((prev) => (prev === i ? null : i))
                         }
                       >
-                        <span className="text-lg font-semibold group-hover:text-blue-300 transition-colors">
+                        <span className="text-base sm:text-lg font-semibold group-hover:text-blue-300 transition-colors">
                           {faq.q}
                         </span>
                         <div
@@ -848,7 +865,7 @@ export default function EaseMyShipping() {
                         </div>
                       </button>
                       {activeFAQ === i && (
-                        <div className="px-6 pb-6 text-slate-300 text-sm leading-relaxed animate-fadeIn border-t border-slate-800/50 pt-4">
+                        <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-slate-300 text-sm leading-relaxed animate-fadeIn border-t border-slate-800/50 pt-3 sm:pt-4">
                           {faq.a}
                         </div>
                       )}
@@ -866,24 +883,24 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-950"
           style={{ zIndex: 6, ...(sectionStyles["testimonials"] || {}) }}
         >
-          <div className="inner-slide py-16 px-6 md:px-10">
+          <div className="inner-slide py-14 sm:py-16 px-4 sm:px-6 md:px-10">
             <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                <div className="inline-block mb-4">
-                  <span className="px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-medium uppercase tracking-wider">
+              <div className="text-center mb-12 sm:mb-16">
+                <div className="inline-block mb-3 sm:mb-4">
+                  <span className="px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider">
                     Testimonials
                   </span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-pink-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-pink-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">
                   What Our Clients Say
                 </h2>
-                <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
                   Growing brands, manufacturers and exporters rely on us to keep
                   their supply chains moving.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {testimonials.map((t, i) => (
                   <div
                     key={i}
@@ -896,12 +913,12 @@ export default function EaseMyShipping() {
                     }
                     style={{ animationDelay: `${i * 0.07}s` }}
                   >
-                    <div className="group relative h-full p-8 rounded-3xl border border-slate-800/50 bg-slate-900/70 hover:bg-slate-900/90 backdrop-blur-sm transition-all hover:-translate-y-3 hover:shadow-2xl overflow-hidden">
+                    <div className="group relative h-full p-7 sm:p-8 rounded-3xl border border-slate-800/50 bg-slate-900/70 hover:bg-slate-900/90 backdrop-blur-sm transition-all hover:-translate-y-3 hover:shadow-2xl overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute -right-10 -bottom-10 w-32 sm:w-40 h-32 sm:h-40 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
                       <div className="relative z-10">
-                        <div className="flex gap-1 mb-4">
+                        <div className="flex gap-1 mb-3 sm:mb-4">
                           {[...Array(5)].map((_, j) => (
                             <Star
                               key={j}
@@ -909,11 +926,11 @@ export default function EaseMyShipping() {
                             />
                           ))}
                         </div>
-                        <p className="text-base text-slate-100 leading-relaxed mb-6 italic">
+                        <p className="text-sm sm:text-base text-slate-100 leading-relaxed mb-5 sm:mb-6 italic">
                           "{t.quote}"
                         </p>
-                        <div className="border-t border-slate-800/50 pt-4 flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/50">
+                        <div className="border-t border-slate-800/50 pt-3 sm:pt-4 flex items-center gap-3">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/50">
                             {t.name.charAt(0)}
                           </div>
                           <div>
@@ -940,8 +957,8 @@ export default function EaseMyShipping() {
           className="slide-section bg-slate-900"
           style={{ zIndex: 7, ...(sectionStyles["contact"] || {}) }}
         >
-          <div className="inner-slide py-20 px-6 md:px-10">
-            <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-stretch">
+          <div className="inner-slide py-16 sm:py-20 px-4 sm:px-6 md:px-10">
+            <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 md:gap-12 items-stretch">
               <div
                 data-animate
                 id="contact-copy"
@@ -949,65 +966,65 @@ export default function EaseMyShipping() {
                   (isVisible["contact-copy"]
                     ? "animate-fadeInUp "
                     : "opacity-0 ") +
-                  "space-y-8 flex flex-col justify-center"
+                  "space-y-6 sm:space-y-8 flex flex-col justify-center"
                 }
               >
                 <div>
-                  <div className="inline-block mb-4">
-                    <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-300 text-xs font-medium uppercase tracking-wider">
+                  <div className="inline-block mb-3 sm:mb-4">
+                    <span className="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider">
                       Get in Touch
                     </span>
                   </div>
-                  <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-green-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-green-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
                     Talk to Our Team
                   </h2>
                 </div>
 
-                <p className="text-xl text-slate-300 leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-slate-300 leading-relaxed">
                   Share your shipping volume, routes and constraints—we'll show you
                   exactly how we can simplify operations and reduce logistics
                   stress.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 hover:border-blue-500/50 transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/50">
-                      <Globe className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/50">
+                      <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
                     <div>
-                      <span className="block text-slate-400 text-xs uppercase tracking-wide mb-1">
+                      <span className="block text-slate-400 text-[11px] sm:text-xs uppercase tracking-wide mb-1">
                         Email
                       </span>
-                      <span className="text-slate-100 font-medium">
+                      <span className="text-slate-100 font-medium text-sm sm:text-base break-all">
                         support@easemyshipping.com
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 hover:border-green-500/50 transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-green-500/50">
-                      <Package className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-green-500/50">
+                      <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
                     <div>
-                      <span className="block text-slate-400 text-xs uppercase tracking-wide mb-1">
+                      <span className="block text-slate-400 text-[11px] sm:text-xs uppercase tracking-wide mb-1">
                         Phone / WhatsApp
                       </span>
-                      <span className="text-slate-100 font-medium">
+                      <span className="text-slate-100 font-medium text-sm sm:text-base">
                         +91-98XX-XXX-XXX
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-full overflow-hidden shadow-xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-105">
+                <div className="flex flex-wrap gap-3 sm:gap-4 pt-3 sm:pt-4">
+                  <button className="group relative px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm sm:text-base font-medium rounded-full overflow-hidden shadow-xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-105">
                     <span className="relative z-10 flex items-center gap-2">
                       Book a Discovery Call
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </button>
-                  <button className="px-8 py-4 border-2 border-slate-500/50 font-medium rounded-full hover:border-green-400 hover:text-green-300 transition-all hover:scale-105 backdrop-blur-sm">
+                  <button className="px-7 sm:px-8 py-3.5 sm:py-4 border-2 border-slate-500/50 text-sm sm:text-base font-medium rounded-full hover:border-green-400 hover:text-green-300 transition-all hover:scale-105 backdrop-blur-sm">
                     Chat on WhatsApp
                   </button>
                 </div>
@@ -1023,15 +1040,15 @@ export default function EaseMyShipping() {
                 }
                 style={{ animationDelay: "0.2s" }}
               >
-                <div className="relative w-full rounded-3xl border border-slate-800/50 bg-slate-950/90 backdrop-blur-xl shadow-2xl p-8 overflow-hidden">
-                  <div className="absolute -right-20 -top-20 w-80 h-80 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl rounded-full" />
+                <div className="relative w-full rounded-3xl border border-slate-800/50 bg-slate-950/90 backdrop-blur-xl shadow-2xl p-6 sm:p-8 overflow-hidden">
+                  <div className="absolute -right-16 sm:-right-20 -top-16 sm:-top-20 w-64 sm:w-80 h-64 sm:h-80 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl rounded-full" />
 
-                  <div className="relative z-10 space-y-6">
+                  <div className="relative z-10 space-y-5 sm:space-y-6">
                     <div>
-                      <h3 className="text-2xl font-bold mb-2">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">
                         Share a few details
                       </h3>
-                      <p className="text-sm text-slate-400">
+                      <p className="text-xs sm:text-sm text-slate-400">
                         Our team will get back within one business day with
                         relevant options—no spam, no generic pitches.
                       </p>
@@ -1039,43 +1056,43 @@ export default function EaseMyShipping() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs text-slate-400 mb-2 font-medium">
+                        <label className="block text-[11px] sm:text-xs text-slate-400 mb-2 font-medium">
                           Name
                         </label>
                         <input
                           type="text"
-                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-500"
+                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-500"
                           placeholder="Your name"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-slate-400 mb-2 font-medium">
+                        <label className="block text-[11px] sm:text-xs text-slate-400 mb-2 font-medium">
                           Work Email
                         </label>
                         <input
                           type="email"
-                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-500"
+                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-500"
                           placeholder="you@company.com"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-slate-400 mb-2 font-medium">
+                        <label className="block text-[11px] sm:text-xs text-slate-400 mb-2 font-medium">
                           What do you want to ship?
                         </label>
                         <textarea
                           rows={4}
-                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none placeholder:text-slate-500"
+                          className="w-full rounded-xl bg-slate-900/80 border border-slate-700/50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none placeholder:text-slate-500"
                           placeholder="e.g. 20–30 B2B pallets per week, pan-India + exports"
                         />
                       </div>
                     </div>
 
-                    <button className="group relative w-full py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-xl overflow-hidden shadow-xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-105">
+                    <button className="group relative w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm sm:text-base font-medium rounded-xl overflow-hidden shadow-xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-105">
                       <span className="relative z-10">Submit Inquiry</span>
                       <span className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
 
-                    <p className="text-xs text-slate-500 text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-500 text-center">
                       By submitting, you agree to be contacted about logistics
                       solutions. We respect your inbox.
                     </p>
@@ -1090,58 +1107,59 @@ export default function EaseMyShipping() {
       {/* CTA */}
       <section
         id="cta"
-        className="relative w-full py-32 px-6 flex items-center justify-center text-center overflow-hidden"
+        className="relative w-full py-24 sm:py-32 px-4 sm:px-6 flex items-center justify-center text-center overflow-hidden"
         style={{ zIndex: 999 }}
       >
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `linear-gradient(to bottom, rgba(15,23,42,0.7), rgba(15,23,42,0.95)), url('${withBase(
-  "images/cta-bg.jpg"
-)}')`,
-
+              "images/cta-bg.jpg"
+            )}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/10 to-slate-950/40" />
-        <div className="absolute inset-0 flex justify-center items-center">
-          <div className="w-[600px] h-[600px] bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+          <div className="w-[360px] sm:w-[500px] md:w-[600px] h-[360px] sm:h-[500px] md:h-[600px] bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-[100px] sm:blur-[120px] rounded-full animate-pulse" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto space-y-8 animate-ctaFadeUp">
-          <div className="inline-block mb-4">
-            <span className="px-5 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-300 text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
+        <div className="relative max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-ctaFadeUp">
+          <div className="inline-block mb-3 sm:mb-4">
+            <span className="px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-300 text-[11px] sm:text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
               Start Your Journey
             </span>
           </div>
-          <div className="absolute inset-0 opacity-20">
-          <div 
-            className="absolute inset-0 animate-grid-flow"
-            style={{
-              backgroundImage: "linear-gradient(to right, rgba(59, 130, 246, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(59, 130, 246, 0.3) 1px, transparent 1px)",
-              backgroundSize: "100px 100px",
-            }}
-          />
-        </div>
-        
-        <div className="absolute inset-0 flex justify-center items-center">
-          <div className="w-[400px] h-[400px] bg-blue-500/20 blur-3xl rounded-full animate-pulse-glow" />
-        </div>
 
-          <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <div
+              className="absolute inset-0 animate-grid-flow"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(59, 130, 246, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(59, 130, 246, 0.3) 1px, transparent 1px)",
+                backgroundSize: "100px 100px",
+              }}
+            />
+          </div>
+
+          <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+            <div className="w-[260px] sm:w-[320px] h-[260px] sm:h-[320px] bg-blue-500/20 blur-3xl rounded-full animate-pulse-glow" />
+          </div>
+
+          <h2 className="cta-title text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
             Ready to Ship?
           </h2>
 
-          <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="cta-text text-base sm:text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Let us revolutionize your logistics. Get a custom quote in just 60
             seconds.
           </p>
 
-          <button className="group relative px-12 py-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 text-white text-lg font-medium rounded-full overflow-hidden shadow-2xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-110">
-            <span className="relative z-10 flex items-center justify-center gap-3">
+          <button className="group relative px-9 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 text-white text-sm sm:text-lg font-medium rounded-full overflow-hidden shadow-2xl shadow-blue-500/50 hover:shadow-blue-400/70 transition-all hover:scale-110">
+            <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
               Get Your Quote
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+              <ArrowRight className="w-5 sm:w-6 h-5 sm:h-6 group-hover:translate-x-2 transition-transform" />
             </span>
             <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </button>
@@ -1149,28 +1167,28 @@ export default function EaseMyShipping() {
       </section>
 
       {/* FOOTER */}
-      <footer className="relative border-t border-slate-800/50 py-16 px-6 bg-slate-950">
+      <footer className="relative border-t border-slate-800/50 py-12 sm:py-16 px-4 sm:px-6 bg-slate-950">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
+          <div className="grid md:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/50">
+              <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/50">
                   <Package className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                   EaseMyShipping
                 </span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs">
                 Making logistics simple, efficient, and futuristic.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="font-bold mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wider">
                 Quick Links
               </h4>
-              <ul className="space-y-3 text-slate-400 text-sm">
+              <ul className="space-y-2.5 sm:space-y-3 text-slate-400 text-xs sm:text-sm">
                 {["about", "services", "why", "faq", "contact"].map((link) => (
                   <li key={link}>
                     <button
@@ -1189,10 +1207,10 @@ export default function EaseMyShipping() {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="font-bold mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wider">
                 Services
               </h4>
-              <ul className="space-y-3 text-slate-400 text-sm">
+              <ul className="space-y-2.5 sm:space-y-3 text-slate-400 text-xs sm:text-sm">
                 <li>Courier Services</li>
                 <li>Air Freight</li>
                 <li>Sea Freight</li>
@@ -1201,17 +1219,17 @@ export default function EaseMyShipping() {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4 text-sm uppercase tracking-wider">
+              <h4 className="font-bold mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wider">
                 Contact
               </h4>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs">
                 Get in touch with our team for personalized logistics solutions.
               </p>
             </div>
           </div>
 
-          <div className="border-t border-slate-800/50 pt-8 text-center">
-            <p className="text-slate-500 text-xs">
+          <div className="border-t border-slate-800/50 pt-5 sm:pt-8 text-center">
+            <p className="text-slate-500 text-[11px] sm:text-xs">
               © {new Date().getFullYear()} EaseMyShipping. All Rights Reserved.
             </p>
           </div>
@@ -1413,6 +1431,51 @@ export default function EaseMyShipping() {
         @keyframes marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
+        }
+
+        /* MOBILE / TABLET OPTIMIZATIONS */
+        @media (max-width: 1024px) {
+          .layered-container {
+            perspective: none;
+            padding: 2rem 0 3rem;
+          }
+
+          .slide-section {
+            position: static;
+            top: auto;
+            min-height: auto;
+            margin: 0 0 3rem 0;
+            max-width: 100%;
+            border-radius: 1.5rem;
+            box-shadow: 0 18px 40px rgba(15,23,42,0.75);
+            transform: none !important;
+            opacity: 1 !important;
+          }
+
+          .inner-slide {
+            padding-top: 2.5rem;
+            padding-bottom: 3rem;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .hero-title {
+            font-size: 2.2rem;
+            line-height: 1.15;
+          }
+
+          .hero-subtitle {
+            font-size: 0.98rem;
+          }
+
+          .cta-title {
+            font-size: 2.3rem;
+            line-height: 1.2;
+          }
+
+          .cta-text {
+            font-size: 1rem;
+          }
         }
       `}</style>
     </div>
