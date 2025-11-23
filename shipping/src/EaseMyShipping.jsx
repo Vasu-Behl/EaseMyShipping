@@ -16,6 +16,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+const withBase = (p) =>
+  `${import.meta.env.BASE_URL.replace(/\/$/, "")}/${p.replace(/^\//, "")}`;
+
 export default function EaseMyShipping() {
   const [scrollY, setScrollY] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -26,22 +29,24 @@ export default function EaseMyShipping() {
   const [sectionStyles, setSectionStyles] = useState({});
 
   const heroImages = [
-    "/images/hero-ship.jpg",
-    "/images/port.jpg",
-    "/images/truck.jpg",
-    "/images/cta-bg.jpg",
-  ];
+  withBase("images/hero-ship.jpg"),
+  withBase("images/port.jpg"),
+  withBase("images/truck.jpg"),
+  withBase("images/cta-bg.jpg"),
+];
+
   const [heroIndex, setHeroIndex] = useState(0);
 
   const brandLogos = [
-    { src: "/logos/biba.png", alt: "BIBA", size: "h-14" },
-    { src: "/logos/apml.png", alt: "APML", size: "h-16" },
-    { src: "/logos/stag.png", alt: "STAG Global", size: "h-12" },
-    { src: "/logos/cls.png", alt: "CLS", size: "h-14" },
-    { src: "/logos/semco.png", alt: "SEMCO", size: "h-10" },
-    { src: "/logos/kailash.png", alt: "Kailash", size: "h-16" },
-    { src: "/logos/tt.png", alt: "T.T.", size: "h-14" },
-  ];
+  { src: withBase("logos/biba.png"), alt: "BIBA", size: "h-14" },
+  { src: withBase("logos/apml.png"), alt: "APML", size: "h-16" },
+  { src: withBase("logos/stag.png"), alt: "STAG Global", size: "h-12" },
+  { src: withBase("logos/cls.png"), alt: "CLS", size: "h-14" },
+  { src: withBase("logos/semco.png"), alt: "SEMCO", size: "h-10" },
+  { src: withBase("logos/kailash.png"), alt: "Kailash", size: "h-16" },
+  { src: withBase("logos/tt.png"), alt: "T.T.", size: "h-14" },
+];
+
 
   const services = [
     {
@@ -613,11 +618,13 @@ export default function EaseMyShipping() {
                 <div
                   className="relative h-80 md:h-96 lg:h-[26rem] w-full rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900/60 group hover:scale-105 transition-transform duration-500"
                   style={{
-                    backgroundImage:
-                      "linear-gradient(to top, rgba(15,23,42,0.9), rgba(15,23,42,0.05)), url('/images/port.jpg')",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
+  backgroundImage: `linear-gradient(to top, rgba(15,23,42,0.9), rgba(15,23,42,0.05)), url('${withBase(
+    "images/port.jpg"
+  )}')`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+}}
+
                 >
                   <div className="absolute inset-x-6 bottom-6 rounded-2xl bg-slate-950/80 border border-slate-700/60 px-4 py-3 md:px-5 md:py-4 backdrop-blur-md group-hover:scale-105 transition-transform">
                     <div className="flex items-start gap-3">
@@ -1089,8 +1096,10 @@ export default function EaseMyShipping() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage:
-              "linear-gradient(to bottom, rgba(15,23,42,0.7), rgba(15,23,42,0.95)), url('/images/cta-bg.jpg')",
+            backgroundImage: `linear-gradient(to bottom, rgba(15,23,42,0.7), rgba(15,23,42,0.95)), url('${withBase(
+  "images/cta-bg.jpg"
+)}')`,
+
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
